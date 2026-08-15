@@ -35,8 +35,14 @@ export default function AboutPage() {
         </span>
         <div className="max-w-xl w-full">
           <p className="text-lg leading-relaxed mb-4">Below is a short video on how to use the site.</p>
-          <div className="aspect-video border border-[var(--foreground)] flex items-center justify-center text-[var(--foreground)] opacity-50">
-            Video coming soon
+          <div className="aspect-video border border-[var(--foreground)]">
+            <iframe
+              className="w-full h-full"
+              src="https://www.youtube.com/embed/EGL9XFrjlFY"
+              title="How to use the Phoneme Activity Builder"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
           </div>
         </div>
       </div>
