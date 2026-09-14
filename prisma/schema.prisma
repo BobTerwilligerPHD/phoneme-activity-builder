@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model WordList {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  words       Word[]
+  activities  Activity[]
+}
+
+model Word {
+  id         String    @id @default(cuid())
+  text       String
+  hint       String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  wordListId String
+  wordList   WordList  @relation(fields: [wordListId], references: [id], onDelete: Cascade)
+  phonemes   Phoneme[]
+
+  @@unique([wordListId, text])
+  @@index([wordListId])
+}
+
+model Phoneme {
+  id       String @id @default(cuid())
+  symbol   String
+  position Int
+  wordId   String
+  word     Word   @relation(fields: [wordId], references: [id], onDelete: Cascade)
+
+  @@unique([wordId, position])
+  @@index([wordId])
+}
+
+model Activity {
+  id               String   @id @default(cuid())
+  title            String
+  activityType     String
+  difficulty       String
+  showHints        Boolean  @default(true)
+  maxGuesses       Int?
+  gridRows         Int?
+  gridColumns      Int?
+  includeAnswerKey Boolean  @default(false)
+  outputFilename   String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  wordListId       String
+  wordList         WordList @relation(fields: [wordListId], references: [id], onDelete: Cascade)
+
+  @@index([wordListId])
+  @@index([activityType])
+}
