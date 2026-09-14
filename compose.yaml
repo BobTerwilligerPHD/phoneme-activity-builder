@@ -1,0 +1,12 @@
+services:
+  phoneme-builder:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: file:/app/data/phoneme-builder.db
+    volumes:
+      - phoneme-data:/app/data
+
+volumes:
+  phoneme-data:
