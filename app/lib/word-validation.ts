@@ -1,5 +1,6 @@
 import type { Prisma } from "../generated/prisma/client";
 import type { ValidationResult } from "./validation";
+import { isNonArrayObject, unsupportedFields as getUnsupportedFields } from "./validation-helpers";
 
 export type WordCreateData = Pick<Prisma.WordCreateInput, "text" | "hint"> & {
   phonemes: string[];
@@ -21,7 +22,7 @@ export function validateWordInput(
   input: unknown,
   { partial = false }: { partial?: boolean } = {},
 ): ValidationResult<WordUpdateData> {
-  if (input === null || typeof input !== "object" || Array.isArray(input)) {
+  if (!isNonArrayObject(input)) {
     return { valid: false, errors: ["Request body must be a JSON object."] };
   }
 
@@ -29,9 +30,7 @@ export function validateWordInput(
   const errors: string[] = [];
   const data: WordUpdateData = {};
 
-  const unsupportedFields = Object.keys(body).filter(
-    (field) => !SUPPORTED_FIELDS.includes(field as (typeof SUPPORTED_FIELDS)[number]),
-  );
+  const unsupportedFields = getUnsupportedFields(body, SUPPORTED_FIELDS);
 
   if (unsupportedFields.length > 0) {
     errors.push(`Unsupported field(s): ${unsupportedFields.join(", ")}.`);
