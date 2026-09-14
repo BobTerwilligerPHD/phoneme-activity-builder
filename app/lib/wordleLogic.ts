@@ -1,10 +1,20 @@
 import { PHONEME_KEYBOARD, PHONEME_INFO } from "./phonemeData";
+import type { Difficulty } from "./client-api";
+import { escapeHtml, scriptJson } from "./standalone";
+
+export type Feedback = "correct" | "present" | "absent";
+export type WordleOutput = { title: string; targetPhonemes: string[]; englishWord: string; hint: string | null; showHints: boolean; maxGuesses: number; includeAnswerKey: boolean; difficulty: Difficulty };
+
+export function visibleWordHint(hint: string | null, word: string): string | null {
+  return hint && !hint.toLocaleLowerCase().includes(word.toLocaleLowerCase()) ? hint : null;
+}
+
 
 export const MAX_PHONEMES = 8;
 
-export function getFeedback(guess, target) {
-  const result = Array(guess.length).fill("absent");
-  const remaining = {};
+export function getFeedback(guess: string[], target: string[]): Feedback[] {
+  const result: Feedback[] = Array(guess.length).fill("absent");
+  const remaining: Record<string, number> = Object.create(null);
 
   target.forEach((p, i) => {
     if (guess[i] === p) {
@@ -25,26 +35,27 @@ export function getFeedback(guess, target) {
   return result;
 }
 
-export function cellClass(status) {
+export function cellClass(status: Feedback | "empty") {
   if (status === "correct") return "bg-green-700 text-white border-green-700";
   if (status === "present") return "bg-amber-700 text-white border-amber-700";
   if (status === "absent") return "bg-gray-600 text-white border-gray-600";
   return "bg-[var(--background)] text-[var(--foreground)] border-[var(--foreground)]";
 }
 
-export function buildStandaloneHtml({ targetPhonemes, englishWord, showHints, maxGuesses }) {
-  const config = { targetPhonemes, englishWord, showHints, maxGuesses };
+export function buildStandaloneHtml(config: WordleOutput): string {
+  const { targetPhonemes, englishWord, showHints, maxGuesses, includeAnswerKey, title, difficulty } = config;
+  const hint = visibleWordHint(config.hint, englishWord);
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Phoneme Wordle</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(title)}</title>
 <style>
-  body { font-family: Arial, Helvetica, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 16px; }
+  body { font-family: Arial, Helvetica, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 16px; overflow-wrap: anywhere; }
   h1 { font-size: 1.4rem; }
   #layout { display: flex; gap: 32px; align-items: flex-start; justify-content: center; flex-wrap: wrap; margin: 20px 0; }
-  #board { display: grid; gap: 4px; }
+  #board { display: grid; gap: 4px; max-width: 100%; overflow-x: auto; }
   .row { display: grid; gap: 4px; grid-auto-flow: column; }
   .cell { width: 48px; height: 48px; border: 2px solid black; display: flex; align-items: center; justify-content: center; font-weight: bold; }
   .correct { background: #15803d; color: white; border-color: #15803d; }
@@ -76,33 +87,41 @@ export function buildStandaloneHtml({ targetPhonemes, englishWord, showHints, ma
     .cell.flip { animation: tile-flip 0.6s ease-in-out both; }
     .row.shake { animation: row-shake 0.4s; }
   }
+  :focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }
+  input { max-width: 100%; box-sizing: border-box; }
+  @media(max-width: 420px) { #keyboard { grid-template-columns: repeat(6, minmax(0,1fr)); width:100%; } #layout > div { max-width:100%; } }
 </style>
 </head>
 <body>
-<h1>Phoneme Wordle</h1>
+<h1>${escapeHtml(title)}</h1>
+<p>Difficulty: ${escapeHtml(difficulty)}. ${difficulty === "HARD" ? "Keyboard feedback is hidden; use the feedback on each guess." : "Keyboard feedback helps track your guesses."}</p>
+${showHints && hint ? `<p id="stored-hint">Hint: ${escapeHtml(hint)}</p>` : ""}
+${showHints && difficulty === "EASY" ? `<p>First phoneme: /${escapeHtml(targetPhonemes[0])}/</p>` : ""}
 <p>Guess the phoneme word in ${maxGuesses} tries. Click the phoneme keys below to build each guess.</p>
 <div id="layout">
   <div id="board"></div>
   <div>
     <div id="keyboard"></div>
+    <label for="other">Other phoneme</label><input id="other"><button type="button" id="add-other">Add symbol</button>
     <div class="controls">
-      <button id="backspace">Backspace</button>
-      <button id="enter">Enter</button>
+      <button type="button" id="backspace">Backspace</button>
+      <button type="button" id="enter">Enter</button>
     </div>
   </div>
 </div>
 <div id="message" role="status" aria-live="polite"></div>
+${includeAnswerKey ? `<details><summary>Teacher answer key — contains the answer</summary><p>${escapeHtml(englishWord)}: /${escapeHtml(targetPhonemes.join(" "))}/</p></details>` : ""}
 <script>
-  var CONFIG = ${JSON.stringify(config)};
-  var PHONEME_KEYBOARD = ${JSON.stringify(PHONEME_KEYBOARD)};
-  var PHONEME_INFO = ${JSON.stringify(PHONEME_INFO)};
+  var CONFIG = ${scriptJson(config)};
+  var PHONEME_KEYBOARD = ${scriptJson(PHONEME_KEYBOARD)};
+  var PHONEME_INFO = ${scriptJson(PHONEME_INFO)};
 
   var target = CONFIG.targetPhonemes;
   var maxGuesses = CONFIG.maxGuesses;
   var guesses = [];
   var current = [];
   var gameOver = false;
-  var keyStatus = {};
+  var keyStatus = Object.create(null);
   var shakeRow = false;
   var animatedRow = -1;
   var isRevealing = false;
@@ -111,7 +130,7 @@ export function buildStandaloneHtml({ targetPhonemes, englishWord, showHints, ma
 
   function getFeedback(guess, target) {
     var result = target.map(function () { return "absent"; });
-    var remaining = {};
+    var remaining = Object.create(null);
     target.forEach(function (p, i) {
       if (guess[i] === p) {
         result[i] = "correct";
@@ -169,9 +188,12 @@ export function buildStandaloneHtml({ targetPhonemes, englishWord, showHints, ma
     PHONEME_KEYBOARD.flat().forEach(function (p) {
       if (!p) return;
       var key = document.createElement("button");
-      key.className = "key " + (keyStatus[p] || "");
-      key.title = PHONEME_INFO[p] ? "/" + p + "/ = " + PHONEME_INFO[p].label + ' (as in "' + PHONEME_INFO[p].example + '")' : p;
-      key.innerHTML = p + (CONFIG.showHints && PHONEME_INFO[p] ? '<span class="hint">' + PHONEME_INFO[p].label + "</span>" : "");
+      key.type = "button";
+      key.className = "key " + (CONFIG.difficulty === "HARD" ? "" : (keyStatus[p] || ""));
+      key.setAttribute("aria-label", "Add phoneme " + p);
+      key.title = CONFIG.showHints && PHONEME_INFO[p] ? "/" + p + "/ = " + PHONEME_INFO[p].label + ' (as in "' + PHONEME_INFO[p].example + '")' : p;
+      key.textContent = p;
+      if (CONFIG.showHints && PHONEME_INFO[p]) { var label = document.createElement("span"); label.className = "hint"; label.textContent = PHONEME_INFO[p].label; key.appendChild(label); }
       key.onclick = function () { addPhoneme(p); };
       kb.appendChild(key);
     });
@@ -252,6 +274,8 @@ export function buildStandaloneHtml({ targetPhonemes, englishWord, showHints, ma
   };
   document.getElementById("enter").onclick = submitGuess;
 
+  document.getElementById("add-other").onclick = function () { var input = document.getElementById("other"); if(input.value.trim()) addPhoneme(input.value.trim()); input.value = ""; };
+  document.addEventListener("keydown", function(e) { if(e.target.tagName === "INPUT") return; if(e.key === "Enter" && e.target.tagName !== "BUTTON") { e.preventDefault(); submitGuess(); } else if(e.key === "Backspace") { e.preventDefault(); document.getElementById("backspace").click(); } });
   renderBoard();
   renderKeyboard();
 </script>

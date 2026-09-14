@@ -5,8 +5,8 @@ import type { FormEvent } from "react";
 import Panel from "../components/Panel";
 import { buttonClass } from "../components/Button";
 import PhonemeEditor from "./PhonemeEditor";
-import { wordListRequest } from "./word-list-api";
-import type { WordDto, WordListDto } from "./word-list-api";
+import { wordListRequest } from "../lib/client-api";
+import type { WordDto, WordListDto } from "../lib/client-api";
 
 type Draft =
   | { kind: "list"; id?: string; name: string; description: string }
