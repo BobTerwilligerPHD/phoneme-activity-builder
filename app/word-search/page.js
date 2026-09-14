@@ -12,7 +12,7 @@ export default function WordSearchPage() {
   const [wordEntries] = useState(() =>
     WORD_LISTS[3].filter((w) => FIXED_WORDS.includes(w.word))
   );
-  const [puzzle, setPuzzle] = useState(null);
+  const [puzzle, setPuzzle] = useState(() => buildPuzzle(wordEntries));
   const [foundWords, setFoundWords] = useState([]);
   const [hoverInfo, setHoverInfo] = useState(null);
   const [showAnswers, setShowAnswers] = useState(false);
@@ -31,10 +31,6 @@ export default function WordSearchPage() {
     setSelection([]);
     setMessage("");
   }, [wordEntries]);
-
-  useEffect(() => {
-    regenerate();
-  }, [regenerate]);
 
   function handleCellDown(e, r, c) {
     e.preventDefault();

@@ -13,9 +13,13 @@ export default function SettingsPage() {
   const router = useRouter();
   const [theme, setTheme] = useState(null);
 
-  useEffect(() => {
+useEffect(() => {
+  const frameId = requestAnimationFrame(() => {
     setTheme(readThemeCookie() || "light");
-  }, []);
+  });
+
+  return () => cancelAnimationFrame(frameId);
+}, []);
 
   function applyTheme(next) {
     document.cookie = `theme=${next}; path=/; max-age=31536000`;
