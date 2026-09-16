@@ -1,4 +1,7 @@
-export const PHONEME_INFO = {
+type PhonemeInfo = { label: string; example: string };
+type ExampleWord = { word: string; phonemes: string[] };
+
+export const PHONEME_INFO: Record<string, PhonemeInfo | undefined> = {
   p:  { label: "P",  example: "pat" },
   t:  { label: "T",  example: "top" },
   k:  { label: "K",  example: "cat" },
@@ -45,7 +48,7 @@ export const PHONEME_INFO = {
   ə:    { label: "UH", example: "sofa" },
 };
 
-export const PHONEME_KEYBOARD = [
+export const PHONEME_KEYBOARD: (string | null)[][] = [
   ["p", "t", "k", null],
   ["b", "d", "g", null],
   ["n", "m", "ŋ", null],
@@ -60,7 +63,7 @@ export const PHONEME_KEYBOARD = [
   ["æɔ", "ɪə", null, "ə"],
 ];
 
-export const WORD_LISTS = {
+export const WORD_LISTS: Record<number, ExampleWord[]> = {
   3: [
     { word: "bed", phonemes: ["b", "e", "d"] },
     { word: "bid", phonemes: ["b", "ɪ", "d"] },
@@ -159,7 +162,7 @@ export const WORD_LISTS = {
   ],
 };
 
-export function getRandomWord(phonemeCount = 3) {
+export function getRandomWord(phonemeCount: number = 3): ExampleWord {
   const list = WORD_LISTS[phonemeCount] || WORD_LISTS[3];
   return list[Math.floor(Math.random() * list.length)];
 }

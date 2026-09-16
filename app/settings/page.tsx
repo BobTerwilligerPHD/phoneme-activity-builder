@@ -4,14 +4,14 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Button from "../components/Button";
 
-function readThemeCookie() {
+function readThemeCookie(): string | null {
   const match = document.cookie.match(/(?:^|; )theme=([^;]*)/);
   return match ? match[1] : null;
 }
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [theme, setTheme] = useState(null);
+  const [theme, setTheme] = useState<string | null>(null);
 
 useEffect(() => {
   const frameId = requestAnimationFrame(() => {
@@ -21,7 +21,7 @@ useEffect(() => {
   return () => cancelAnimationFrame(frameId);
 }, []);
 
-  function applyTheme(next) {
+  function applyTheme(next: "light" | "dark") {
     document.cookie = `theme=${next}; path=/; max-age=31536000`;
     setTheme(next);
     router.refresh();

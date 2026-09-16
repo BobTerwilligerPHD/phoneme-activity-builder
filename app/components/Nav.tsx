@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 
 const LINKS = [
     { href: "/", label: "Home" },
@@ -16,8 +17,8 @@ const LINKS = [
 export default function Nav() {
     const [open, setOpen] = useState(false);
     const pathname = usePathname();
-    const toggleRef = useRef(null);
-    const linkRefs = useRef([]);
+    const toggleRef = useRef<HTMLButtonElement | null>(null);
+    const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
 
     function closeAndReturnFocus() {
         setOpen(false);
@@ -26,14 +27,14 @@ export default function Nav() {
 
     useEffect(() => {
         if (!open) return;
-        function handleKeyDown(e) {
+        function handleKeyDown(e: KeyboardEvent) {
             if (e.key === "Escape") closeAndReturnFocus();
         }
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [open]);
 
-    function handleLastLinkKeyDown(e) {
+    function handleLastLinkKeyDown(e: ReactKeyboardEvent<HTMLAnchorElement>) {
         if (e.key === "Tab" && !e.shiftKey) {
             e.preventDefault();
             linkRefs.current[0]?.focus();
@@ -82,7 +83,7 @@ export default function Nav() {
                                 return (
                                     <Link
                                         key={link.href}
-                                        ref={(el) => (linkRefs.current[i] = el)}
+                                        ref={(el) => { linkRefs.current[i] = el; }}
                                         href={link.href}
                                         aria-current={active ? "page" : undefined}
                                         className={`px-6 py-3 border-[var(--foreground)] hover:bg-[var(--accent-fill)] hover:text-[var(--accent-on-fill)] active:bg-[var(--accent-fill)] active:text-[var(--accent-on-fill)] ${
