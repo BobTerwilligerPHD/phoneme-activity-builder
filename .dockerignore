@@ -23,8 +23,6 @@ build
 .vercel
 .vscode
 .idea
-.codex
-.agents
 **/.DS_Store
 **/Thumbs.db
 **/*.pem
