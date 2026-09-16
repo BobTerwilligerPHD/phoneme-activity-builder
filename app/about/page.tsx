@@ -2,7 +2,7 @@ export default function AboutPage() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-16 sm:py-20">
       <h2 className="text-3xl sm:text-4xl font-bold leading-tight mb-16 sm:mb-20">
-        CSE3CWA Assessment 1 – Frontend Design and Usability, About page
+        CSE3CWA Assessment 2: About the Phoneme Activity Builder
       </h2>
 
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-12 mb-14 sm:mb-16">
@@ -13,9 +13,9 @@ export default function AboutPage() {
           It&apos;s a tool for Speech Pathology teachers to build classroom activities
           using phoneme symbols instead of normal spelling, since that&apos;s what
           actually matters for sound production and awareness. There are two
-          activities, a Wordle-style guesser and a phoneme Word Search, both
-          previewable in-browser and downloadable as a single HTML file a student
-          can open anywhere, no setup required.
+          activities, a Wordle-style guesser and a phoneme Word Search. Both can
+          be previewed in the browser and downloaded as standalone HTML files
+          generated from stored data.
         </p>
       </div>
 
@@ -24,8 +24,10 @@ export default function AboutPage() {
           Project scope
         </span>
         <p className="text-lg leading-relaxed max-w-xl">
-          This is Assessment 1, so it&apos;s frontend-only, no database or backend
-          yet. Word lists are hardcoded for now, that&apos;s coming in Assessment 2.
+          This Assessment 2 application uses a Next.js backend with Prisma and
+          SQLite to store word lists, ordered phonemes and activity configurations.
+          Teachers can manage that stored data and use it to generate Wordle and
+          Word Search activities.
         </p>
       </div>
 

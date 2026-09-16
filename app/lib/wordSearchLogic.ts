@@ -85,7 +85,7 @@ export function buildStandaloneHtml(config: SearchOutput): string {
   #grid { display: flex; flex-direction: column; gap: 2px; background: #171717; padding: 2px; width: fit-content; user-select: none; touch-action: none; }
   .row { display: flex; gap: 2px; }
   .cell { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: bold; background: white; cursor: pointer; }
-  .cell.selected { background: #fde047; }
+  .cell.selected { background: #fde047; box-shadow: inset 0 0 0 3px #111827; }
   .cell.found { background: #d1d5db; }
   #wordlist { list-style: none; padding: 0; margin: 0 0 16px 0; }
   #wordlist li.found { text-decoration: line-through; color: #999; }
@@ -107,7 +107,7 @@ export function buildStandaloneHtml(config: SearchOutput): string {
     <ul id="wordlist"></ul>
   </div>
 </div>
-${includeAnswerKey ? '<details><summary>Teacher answer key — contains solutions</summary><ul id="answers"></ul></details>' : ""}
+${includeAnswerKey ? '<details><summary>Teacher answer key: contains solutions</summary><ul id="answers"></ul></details>' : ""}
 <script>
   var generatePuzzle = ${buildPuzzle.toString()};
   var ORIGINAL = ${scriptJson(config)};
@@ -253,7 +253,7 @@ ${includeAnswerKey ? '<details><summary>Teacher answer key — contains solution
     list.innerHTML = "";
     wordEntries.forEach(function (entry) {
       var li = document.createElement("li");
-      li.textContent = entry.word + (ORIGINAL.showHints ? " /" + entry.phonemes.join(" ") + "/" + (entry.hint ? " — " + entry.hint : "") : "");
+      li.textContent = entry.word + (ORIGINAL.showHints ? " /" + entry.phonemes.join(" ") + "/" + (entry.hint ? " - " + entry.hint : "") : "");
       if (found.indexOf(entry.id) !== -1) li.className = "found";
       list.appendChild(li);
     });

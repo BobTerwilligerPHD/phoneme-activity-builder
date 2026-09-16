@@ -47,4 +47,6 @@ docs/
 # Local Prisma files
 *.db
 *.db-journal
+*.db-wal
+*.db-shm
 /app/generated/prisma/
